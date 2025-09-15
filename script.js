@@ -1,16 +1,27 @@
-const peer = new Peer();
-let conn = null;
-
 const myIdElement = document.getElementById('my-id');
 const recipientIdInput = document.getElementById('recipientId');
 const messageInput = document.getElementById('messageInput');
 const sendButton = document.getElementById('sendButton');
 const messagesDiv = document.getElementById('messages');
 
-// Zeige die eigene ID an, sobald die Verbindung zum Peer-Server steht
-peer.on('open', (id) => {
-    myIdElement.textContent = id;
-});
+let peer;
+let conn;
+const storedId = localStorage.getItem('myPeerId');
+
+// Prüft, ob bereits eine ID im Browser-Speicher ist
+if (storedId) {
+    peer = new Peer(storedId);
+    console.log("Benutze gespeicherte ID:", storedId);
+    myIdElement.textContent = storedId;
+} else {
+    // Erstellt eine neue ID, wenn keine vorhanden ist
+    peer = new Peer();
+    peer.on('open', (id) => {
+        myIdElement.textContent = id;
+        localStorage.setItem('myPeerId', id);
+        console.log("Neue ID erstellt und gespeichert:", id);
+    });
+}
 
 // Wenn ein anderer Nutzer eine Verbindung zu uns aufbaut
 peer.on('connection', (connection) => {
@@ -64,4 +75,3 @@ function displayMessage(text, type) {
     // Scrolle automatisch zum Ende des Chats
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
-
